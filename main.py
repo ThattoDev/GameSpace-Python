@@ -1,4 +1,5 @@
 import pygame
+import random
 
 pygame.init()
 
@@ -19,13 +20,37 @@ playerImg = pygame.image.load('images/Nave.png').convert_alpha()
 playerImg = pygame.transform.scale(playerImg, (50, 50))
 playerImg = pygame.transform.rotate(playerImg, 45)
 
+missil = pygame.image.load('images/Missil.png').convert_alpha()
+missil = pygame.transform.scale(missil,(25,25))
+missil = pygame.transform.rotate(missil, -45)
+
 pos_alien_x = 500
 pos_alien_y = 360
 
 pos_player_x = 200
 pos_player_y = 300
 
+vel_x_missil = 0
+pos_missil_x = 220
+pos_missil_y = 320
+
+triggered = False
 rodando = True
+
+#Funções
+
+def respawn():
+    x = 1350
+    y = random.randint(1, 640)
+    return [x, y]
+
+def respawn_missil():
+    triggered = False
+    respawn_missil_x = pos_player_x + 20
+    respawn_missil_y = pos_player_y + 20
+    vel_x_missil = 0
+    return [respawn_missil_x, respawn_missil_y, triggered, vel_x_missil]
+
 
 while rodando:
     for event in pygame.event.get():
@@ -39,23 +64,60 @@ while rodando:
     if rel_x < 1280:
         screen.blit(bg, (rel_x, 0))
         
-    #comandos
+#comandos
     
     tecla = pygame.key.get_pressed()
     if tecla[pygame.K_UP] and pos_player_y > 1:
         pos_player_y -= 2
+        
+        if not triggered:
+            pos_missil_y -= 2
+        
     if tecla[pygame.K_DOWN] and pos_player_y < 665:
         pos_player_y += 2
+    
+        if not triggered:
+            pos_missil_y += 2
+        
     if tecla[pygame.K_LEFT] and pos_player_x > 1:
         pos_player_x -= 2
+        
+        if not triggered:
+            pos_missil_x -= 2
+            
     if tecla[pygame.K_RIGHT] and pos_player_x < 1000:
         pos_player_x += 2
+        
+        if not triggered:
+            pos_missil_x += 2
+        
+    if tecla[pygame.K_SPACE]:
+        triggered = True
+        vel_x_missil = 2
+    
+    #Colisão e morte do jogador
+    
+    
+        
+    # Respawn
+    
+    if pos_alien_x == 50:
+        pos_alien_x = respawn()[0]
+        pos_alien_y = respawn()[1]
+        
+    if pos_missil_x == 1300:
+        pos_missil_x, pos_missil_y, triggered, vel_x_missil = respawn_missil()    
+        
     #movimento velocidade
-    x-=1
+    x -= 2
+    pos_alien_x -= 1
     
-    screen.blit(alien, (pos_alien_y, pos_alien_y))
+    pos_missil_x += vel_x_missil
+    
+    #criando imagens
+    screen.blit(alien, (pos_alien_x, pos_alien_y))
+    screen.blit(missil, (pos_missil_x, pos_missil_y))
     screen.blit(playerImg, (pos_player_x, pos_player_y))
-    
     
     
     pygame.display.update()
