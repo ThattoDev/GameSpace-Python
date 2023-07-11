@@ -36,6 +36,13 @@ pos_missil_y = 320
 
 triggered = False
 rodando = True
+pontos = 15
+
+font = pygame.font.SysFont('', 50)
+
+player_rect = playerImg.get_rect()
+missil_rect = missil.get_rect()
+alien_rect = alien.get_rect()
 
 #Funções
 
@@ -50,6 +57,17 @@ def respawn_missil():
     respawn_missil_y = pos_player_y + 20
     vel_x_missil = 0
     return [respawn_missil_x, respawn_missil_y, triggered, vel_x_missil]
+
+def colisions():
+    global pontos
+    if player_rect.colliderect(alien_rect) or alien_rect.x == 60: 
+        pontos -= 1
+        return True
+    elif missil_rect.colliderect(alien_rect):
+        pontos += 1
+        return True
+    else:
+      return False
 
 
 while rodando:
@@ -96,7 +114,14 @@ while rodando:
         vel_x_missil = 2
     
     #Colisão e morte do jogador
+    player_rect.y = pos_player_y
+    player_rect.x = pos_player_x
     
+    missil_rect.y = pos_missil_y
+    missil_rect.x = pos_missil_x
+    
+    alien_rect.y = pos_alien_y
+    alien_rect.x = pos_alien_x
     
         
     # Respawn
@@ -108,16 +133,27 @@ while rodando:
     if pos_missil_x == 1300:
         pos_missil_x, pos_missil_y, triggered, vel_x_missil = respawn_missil()    
         
+        
+    if pos_alien_x == 50 or colisions():
+        pos_alien_x = respawn()[0]
+        pos_alien_y = respawn()[1]
+        
     #movimento velocidade
     x -= 2
+    
     pos_alien_x -= 1
     
     pos_missil_x += vel_x_missil
+    
+    # pygame.draw.rect(screen, (0, 0, 0, 0.5), player_rect, 4)
+    # pygame.draw.rect(screen, (0, 0, 0, 0.5), missil_rect, 4)
+    # pygame.draw.rect(screen, (0, 0, 0), alien_rect, 1)
     
     #criando imagens
     screen.blit(alien, (pos_alien_x, pos_alien_y))
     screen.blit(missil, (pos_missil_x, pos_missil_y))
     screen.blit(playerImg, (pos_player_x, pos_player_y))
     
+    print(pontos)
     
     pygame.display.update()
